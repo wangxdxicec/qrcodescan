@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>金泓信展览扫码平台</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link type="text/css" href="${base}/resource/css/style.css" rel="stylesheet" />
+	<link rel="stylesheet" type="text/css" href="${base}/resource/easyui/themes/metro-blue/easyui.css">
+	<link rel="stylesheet" type="text/css" href="${base}/resource/easyui/themes/icon.css">
+	<script type="text/javascript" src="${base}/resource/js/jquery-1.12.4.js"></script>
+	<script type="text/javascript" src="${base}/resource/js/jquery-ui.js"></script>
+	<script type="text/javascript" src="${base}/resource/jquery.min1.js"></script>
+	<script type="text/javascript" src="${base}/resource/easyui/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="${base}/resource/common.js"></script>
+	<script type="text/javascript" src="${base}/resource/easyui/easyui-validate.js"></script>
+	<style>
+		body {
+			margin: 0px;
+			padding: 0px;
+			width: 100%;
+			height: 100%;
+		}
+
+		input {
+			width: 400px;
+			height: 20px;
+		}
+	</style>
+</head>
+<body>
+<div style="height: 420px;margin-top: 50px" class="easyui-panel" title="展会列表">
+	<table id="fairInfoList" style="height:370px;border: 1px solid #151515;margin-left: 30px;"
+		   data-options="url:'${base}/user/queryResetViewInfoByPage',
+                   loadMsg: '数据加载中......',
+                   singleSelect:false,	//只能当行选择：关闭
+                   fit:true,
+                   fitColumns:true,
+                   idField:'id',
+                   remoteSort:true,
+                   emptyMsg: '没有记录',
+                   toolbar:'#toolbar',
+                   rownumbers: 'true',
+                   pagination:'true',
+                   pageSize:'20'">
+		<thead>
+		<tr>
+			<th data-options="field:'ck',checkbox:true"></th>
+			<th data-options="field: 'fairname', width: $(this).width() / 10">名称</th>
+			<th data-options="field: 'fairalairname', width: $(this).width() / 10">别名</th>
+			<th data-options="field: 'fairbegindate', formatter:formatDatebox, width: $(this).width() / 10">开始时间</th>
+			<th data-options="field: 'fairenddate', formatter:formatDatebox, width: $(this).width() / 10">结束时间</th>
+			<th data-options="field: 'fairenable', formatter: formatEnable, width: $(this).width() / 10">是否启用</th>
+			<th data-options="field: 'init_data_flag', formatter: formatInitData, width: $(this).width() / 10">初始化数据</th>
+			<th data-options="field: 'database_url', width: $(this).width() / 3">数据库地址</th>
+			<th data-options="field: 'load_data_begin_time', width: $(this).width() / 6">数据加载开始时间</th>
+			<th data-options="field: 'load_data_end_time', width: $(this).width() / 6">数据加载结束时间</th>
+			<th data-options="field: 'sync_onsite_start_time', width: $(this).width() / 6">现场同步数据时间</th>
+		</tr>
+		</thead>
+	</table>
+</div>
+
+<div id="toolbar">
+	<div>
+		<div id="addFairInfo" class="easyui-linkbutton" iconCls="icon-add" plain="true">添加展会资料</div>
+	</div>
+</div>
+
+<!-- 修改展会表单 -->
+<div id="modifyFairInfoDlg" data-options="iconCls:'icon-edit',modal:true">
+	<form id="modifyFairInfoForm" name="modifyFairInfoForm">
+		<table style="width: 550px;margin: 20px auto">
+			<tr>
+				<td style="width: 120px;text-align: center">名称：</td>
+				<td><input class="easyui-validatebox" type="text" name="fairname" data-options="required:true"></td>
+			</tr>
+			<tr>
+				<td style="width: 120px;text-align: center">别名：</td>
+				<td><input class="easyui-validatebox" type="text" name="fairalairname" data-options="required:true"></td>
+			</tr>
+			<tr>
+				<td style="width: 120px;text-align: center">开始时间：</td>
+				<td><input class="easyui-validatebox" type="text" name="begintime" data-options="required:true"></td>
+			</tr>
+			<tr>
+				<td style="width: 120px;text-align: center">结束时间：</td>
+				<td><input class="easyui-validatebox" type="text" name="endtime" data-options="required:true"></td>
+			</tr>
+			<tr>
+				<td style="width: 120px;text-align: center">是否启用：</td>
+				<td><input class="easyui-validatebox" type="text" name="fairenable" data-options="required:true"></td>
+			</tr>
+			<tr>
+				<td style="width: 120px;text-align: center">初始化数据：</td>
+				<td><input class="easyui-validatebox" type="text" name="fairinit" data-options="required:true"></td>
+			</tr>
+			<tr>
+				<td style="width: 120px;text-align: center">数据库地址：</td>
+				<td><input class="easyui-validatebox" type="text" name="database_url" data-options="required:true"></td>
+			</tr>
+			<tr>
+				<td style="width: 120px;text-align: center">数据加载开始时间：</td>
+				<td><input class="easyui-validatebox" type="text" name="load_data_begin_time" data-options="required:true"></td>
+			</tr>
+			<tr>
+				<td style="width: 120px;text-align: center">数据加载结束时间：</td>
+				<td><input class="easyui-validatebox" type="text" name="load_data_end_time" data-options="required:true"></td>
+			</tr>
+			<tr>
+				<td style="width: 90px;text-align: center">现场同步数据时间：</td>
+				<td><input class="easyui-validatebox" type="text" name="sync_onsite_start_time"></td>
+			</tr>
+		</table>
+		<input type="hidden" value="fairId" name="fairId" />
+	</form>
+</div>
+
+<script>
+    var checkedFairIdInfo = [];
+    $("#fairInfoList").datagrid({
+        onSelect:function (rowIndex, rowData){
+            var row = $('#fairInfoList').datagrid('getSelections');
+            for (var i = 0; i < row.length; i++) {
+                if (findCheckedFairIdInfo(row[i].id) == -1) {
+                    checkedFairIdInfo.push(row[i].id);
+                }
+            }
+        },
+        onUnselect:function (rowIndex, rowData){
+            var k = findCheckedFairIdInfo(rowData.id);
+            if (k != -1) {
+                checkedFairIdInfo.splice(k, 1);
+            }
+        },
+        onSelectAll:function (rows){
+            for (var i = 0; i < rows.length; i++) {
+                var k = findCheckedFairIdInfo(rows[i].id);
+                if (k == -1) {
+                    checkedFairIdInfo.push(rows[i].id);
+                }
+            }
+        },
+        onUnselectAll:function (rows){
+            for (var i = 0; i < rows.length; i++) {
+                var k = findCheckedFairIdInfo(rows[i].id);
+                if (k != -1) {
+                    checkedFairIdInfo.splice(k, 1);
+                }
+            }
+        },
+        onLoadSuccess:function(data){
+            if(data.rows.length==0){
+                var body = $(this).data().datagrid.dc.body2;
+                body.find('table tbody').append('<tr><td width="'+body.width()+'" style="height: 25px; text-align: center;" colspan="4">没有数据</td></tr>');
+            }
+        },
+        onDblClickRow: function (index, field, value) {
+            document.modifyFairInfoForm.fairId.value = field.id;
+            document.modifyFairInfoForm.fairname.value = field.fairname;
+            document.modifyFairInfoForm.fairalairname.value = field.fairalairname;
+            document.modifyFairInfoForm.begintime.value = formatDatebox(field.fairbegindate);
+            document.modifyFairInfoForm.endtime.value = formatDatebox(field.fairenddate);
+            document.modifyFairInfoForm.fairenable.value = field.fairenable;
+            document.modifyFairInfoForm.fairinit.value = field.init_data_flag;
+            document.modifyFairInfoForm.database_url.value = field.database_url;
+            document.modifyFairInfoForm.load_data_begin_time.value = field.load_data_begin_time;
+            document.modifyFairInfoForm.load_data_end_time.value = field.load_data_end_time;
+            document.modifyFairInfoForm.sync_onsite_start_time.value = field.sync_onsite_start_time;
+            $("#modifyFairInfoDlg").dialog("open");
+        }
+    });
+
+    function findCheckedFairIdInfo(id) {
+        for (var i = 0; i < checkedFairIdInfo.length; i++) {
+            if (checkedFairIdInfo[i] == id) return i;
+        }
+        return -1;
+    }
+
+    //日期时间格式转换
+    function formatDatebox(value) {
+        if (value == null || value == '') {
+            return '';
+        }
+        var dt;
+        if (value instanceof Date) {
+            dt = value;
+        }
+        else {
+            dt = new Date(value);
+            if (isNaN(dt)) {
+                value = value.replace(/\/Date\((-?\d+)\)\//, '$1'); //标红的这段是关键代码，将那个长字符串的日期值转换成正常的JS日期格式
+                dt = new Date();
+                dt.setTime(value);
+            }
+        }
+        return dt.format("yyyy-MM-dd hh:mm:ss");   //这里用到一个javascript的Date类型的拓展方法，这个是自己添加的拓展方法，在后面的步骤3定义
+    }
+
+    Date.prototype.format = function (format)
+    {
+        var o = {
+            "M+": this.getMonth() + 1, //month
+            "d+": this.getDate(),    //day
+            "h+": this.getHours(),   //hour
+            "m+": this.getMinutes(), //minute
+            "s+": this.getSeconds(), //second
+            "q+": Math.floor((this.getMonth() + 3) / 3),  //quarter
+            "S": this.getMilliseconds() //millisecond
+        };
+        if (/(y+)/.test(format)) format = format.replace(RegExp.$1,
+            (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o) if (new RegExp("(" + k + ")").test(format))
+            format = format.replace(RegExp.$1,
+                RegExp.$1.length == 1 ? o[k] :
+                    ("00" + o[k]).substr(("" + o[k]).length));
+        return format;
+    };
+
+    function formatEnable(val, row) {
+        if (val == 1) {
+            return "启用";
+        } else if (val == 2) {
+            return "未启用";
+        } else return "未启用";
+    }
+
+    function formatInitData(val, row) {
+        if (val == 1) {
+            return "完成初始化";
+        } else if (val == 2) {
+            return "未初始化";
+        } else return "未初始化";
+    }
+
+    $('#modifyFairInfoDlg').dialog({
+        title: '修改展会信息',
+        width: 550,
+        height: 360,
+        closed: true,
+        cache: false,
+        modal: true,
+        buttons: [
+            {
+                text: '确认修改',
+                handler: function () {
+                    if ($("#modifyFairInfoForm").form("validate")) {
+                        $.ajax({
+                            url: "${base}/user/modifyFairInfo",
+                            type: "post",
+                            dataType: "json",
+                            data: $("#modifyFairInfoForm").serializeJson(),
+                            success: function (data) {
+                                if (data.resultCode == 0) {
+                                    $("#fairInfoList").datagrid("reload");
+                                    $("#modifyFairInfoDlg").dialog("close");
+                                    $.messager.show({
+                                        title: '成功',
+                                        msg: '修改所属人成功',
+                                        timeout: 5000,
+                                        showType: 'slide'
+                                    });
+                                } else {
+                                    $.messager.alert('错误', data.description);
+                                }
+                            }
+                        });
+                    }
+                }
+            },
+            {
+                text: '取消',
+                handler: function () {
+                    document.getElementById("modifyFairInfoForm").reset();
+                    $("#modifyFairInfoDlg").dialog("close");
+                }
+            }
+        ]
+    });
+
+    //添加展会资料
+    $('#addFairInfo').click(function(){
+        document.getElementById("modifyFairInfoForm").reset();
+        document.modifyFairInfoForm.fairId.value = -1;
+        $("#modifyFairInfoDlg").dialog("open");
+    });
+</script>
+</body>
+</html>

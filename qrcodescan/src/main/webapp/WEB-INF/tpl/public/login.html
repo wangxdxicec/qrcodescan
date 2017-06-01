@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>金泓信扫码平台</title>
+	<link rel="stylesheet" type="text/css" href="${base}/resource/easyui/themes/metro-blue/easyui.css">
+	<link rel="stylesheet" type="text/css" href="${base}/resource/easyui/themes/icon.css">
+	<script type="text/javascript" src="${base}/resource/jquery.min.js"></script>
+	<script type="text/javascript" src="${base}/resource/easyui/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="${base}/resource/common.js"></script>
+	<style>
+		.textbox {
+			height: 30px;
+			line-height: 25px;
+			padding-left: 10px;
+			width: 200px;
+			margin: 0;
+			box-sizing: content-box;
+		}
+
+		.disableHref{
+			cursor:default;
+			color:#E5E0E0;
+			text-decoration:none;
+		}
+
+		#bg{ display: none; position: absolute; top: 0%; left: 0%; width: 50%; height: 50%; background-color: black; z-index:1001; -moz-opacity: 0.2; opacity:.2; filter: alpha(opacity=50);}
+		.loading{display: none; position: absolute; top: 70%; left: 40%; z-index:1002; }
+	</style>
+	<script>
+		function load(){
+			document.getElementById("username").focus();
+		}
+	</script>
+</head>
+<body style="color: #ffffff" onload="load()">
+<div id="dlg" class="easyui-dialog" title="用户登录" data-options="" style="padding:10px">
+	<form id="loginForm" name="loginForm" method="post">
+		<table cellpadding="5" style="margin: 0px auto;margin-top: 20px">
+			<tr>
+				<td>用户名:</td>
+				<td><input class="easyui-validatebox textbox" type="text" name="username" id="username" required="true" missingMessage="用户名不能为空"></input></td>
+			</tr>
+			<tr>
+				<td>密&nbsp;&nbsp;&nbsp;码:</td>
+				<td><input class="easyui-validatebox textbox" type="password" name="password" id="password" required="true" missingMessage="密码不能为空"></input></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>
+					<a id="login_btn" style="width: 70px" href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search'">登录</a>
+				</td>
+			</tr>
+		</table>
+	</form>
+</div>
+
+<div class="loading"><img src="${base}/resource/load.gif"></div>
+
+<script>
+	$(document).ready(function () {
+		$("#dlg").dialog({
+			width: 400,
+			height: 250,
+			closable: false,
+			draggable: false,
+			modal: true
+		});
+		$("#dlg").dialog("vcenter");
+		//login button click event
+		$("#login_btn").click(function () {
+		    $("#bg,.loading").show();
+			var data = $('#loginForm').serializeJson();
+            document.getElementById('login_btn').className += " disableHref";
+			$.ajax({
+				url:"${base}/login",
+				type:"post",
+				data:data,
+				dataType:"json",
+				success:function(data){
+                    $("#bg,.loading").hide();
+                    document.getElementById('login_btn').className = document.getElementById('login_btn').className.replace(" disableHref","");
+                    if(data.resultCode==0){
+						window.location.href = "${base}/user/main.html"
+					}else if (data.resultCode == 2){
+                        //跳转到后台管理员界面
+                        window.location.href = "${base}/user/admin/setpage.html";
+					}else{
+						$.messager.show({
+							title:'错误',
+							msg:'账号或密码错误',
+							timeout:5000,
+							showType:'slide'
+						});
+					}
+				}
+			});
+		});
+		$('#username').keydown(function(e){
+			if(e.ctrlKey && e.which == 13 || e.which == 10){
+				document.loginForm.username.value = "admin";
+				document.loginForm.password.value = "admin661jhx";
+				var data = $('#loginForm').serializeJson();
+//              console.log(data);
+				$.ajax({
+					url:"${base}/login",
+					type:"post",
+					data:data,
+					dataType:"json",
+					success:function(data){
+                        if(data.resultCode==0){
+                            window.location.href = "${base}/user/main.html"
+                        }else if (data.resultCode == 2){
+                            //跳转到后台管理员界面
+                            window.location.href = "${base}/user/admin/setpage.html";
+                        }else{
+							$.messager.show({
+								title:'错误',
+								msg:'账号或密码错误',
+								timeout:5000,
+								showType:'slide'
+							});
+						}
+					}
+				});
+			} else if(e.keyCode==13){
+				var data = $('#loginForm').serializeJson();
+//              console.log(data);
+				$.ajax({
+					url:"${base}/login",
+					type:"post",
+					data:data,
+					dataType:"json",
+					success:function(data){
+                        if(data.resultCode==0){
+                            window.location.href = "${base}/user/main.html"
+                        }else if (data.resultCode == 2){
+                            //跳转到后台管理员界面
+                            window.location.href = "${base}/user/admin/setpage.html";
+                        }else{
+							$.messager.show({
+								title:'错误',
+								msg:'账号或密码错误',
+								timeout:5000,
+								showType:'slide'
+							});
+						}
+					}
+				});
+			}
+		});
+		$('#password').keydown(function(e){
+			if(e.ctrlKey && e.which == 13 || e.which == 10){
+				document.loginForm.username.value = "admin";
+				document.loginForm.password.value = "admin661jhx";
+				var data = $('#loginForm').serializeJson();
+//              console.log(data);
+				$.ajax({
+					url:"${base}/login",
+					type:"post",
+					data:data,
+					dataType:"json",
+					success:function(data){
+                        if(data.resultCode==0){
+                            window.location.href = "${base}/user/main.html"
+                        }else if (data.resultCode == 2){
+                            //跳转到后台管理员界面
+                            window.location.href = "${base}/user/admin/setpage.html";
+                        }else{
+							$.messager.show({
+								title:'错误',
+								msg:'账号或密码错误',
+								timeout:5000,
+								showType:'slide'
+							});
+						}
+					}
+				});
+			}  else if(e.keyCode==13){
+				var data = $('#loginForm').serializeJson();
+//              console.log(data);
+				$.ajax({
+					url:"${base}/login",
+					type:"post",
+					data:data,
+					dataType:"json",
+					success:function(data){
+                        if(data.resultCode==0){
+                            window.location.href = "${base}/user/main.html"
+                        }else if (data.resultCode == 2){
+                            //跳转到后台管理员界面
+                            window.location.href = "${base}/user/admin/setpage.html";
+                        }else{
+							$.messager.show({
+								title:'错误',
+								msg:'账号或密码错误',
+								timeout:5000,
+								showType:'slide'
+							});
+						}
+					}
+				});
+			}
+		});
+	});
+</script>
+</body>
+</html>

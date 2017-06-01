@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>金泓信展览扫码平台</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link type="text/css" href="${base}/resource/css/style.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="${base}/resource/easyui/themes/metro-blue/easyui.css">
+    <link rel="stylesheet" type="text/css" href="${base}/resource/easyui/themes/icon.css">
+    <script type="text/javascript" src="${base}/resource/js/jquery-1.12.4.js"></script>
+    <script type="text/javascript" src="${base}/resource/js/jquery-ui.js"></script>
+    <script type="text/javascript" src="${base}/resource/jquery.min1.js"></script>
+    <script type="text/javascript" src="${base}/resource/easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="${base}/resource/common.js"></script>
+    <script type="text/javascript" src="${base}/resource/easyui/easyui-validate.js"></script>
+
+    <style>
+        *{padding:0;margin:0;}
+
+        #dialogVisitorPass .overlayCon
+        {
+            text-align:center;
+        }
+        .credentialsPreview .prevHeader
+        {
+            height:80px;
+            font-size:16px;
+            font-weight:bold;
+            line-height:80px;
+            cursor:default;
+        }
+        .credentialsPreview h4 {
+            padding: 3px 0;
+            margin: 0;
+            text-align: center;
+            font-weight: normal;
+            font-size: 22px;
+            line-height: 40px;
+            width: 100%;
+        }
+        .credentialsPreview h5 {
+            padding: 0;
+            margin: 0;
+            text-align: center;
+            font-weight: normal;
+            font-size: 18px;
+            line-height: 150%;
+            width: 100%;
+        }
+        .checkOuter{
+            overflow: hidden;
+            width:450px;
+            margin:0 auto;
+
+        }
+        .checkbox{
+            float:left;
+            line-height:20px;
+            padding-left:30px;
+            box-sizing: border-box;
+        }
+        .checkbox>label{
+            font-size: 18px;
+            font-family: "微软雅黑";
+        }
+
+        #bg{ display: none; position: absolute; top: 0%; left: 0%; width: 50%; height: 50%; background-color: black; z-index:1001; -moz-opacity: 0.2; opacity:.2; filter: alpha(opacity=50);}
+        .loading{display: none; position: absolute; top: 70%; left: 40%; z-index:1002; }
+    </style>
+</head>
+
+
+<body style="width:100%;" onLoad="init(this)" oncontextmenu="return false" onselectstart="return false">
+<div id="wholebg" style="position: fixed;top:0;z-index: -1000;"><img alt="" src="${base}/resource/scancode.jpg" style="width: 100%;"></div>
+<div id="scancode" style="font-size: 14px; height: 35px;margin-top:120px; margin-left: 30px;">
+    登记号：<input type="text" style="width:50%;height:30px;font-size:14px;" name="scancodeText" id="scancodeText"
+               oninput="(this.v=function(){this.value=this.value.replace(/[^0-9-]+/,'');}).call(this)"/>
+    <!--<select id="col_name" name="col_name" style="height: 30px; font-size: 14px; padding-left:15px; margin-left: 20px;"></select>
+    <button type="button" style="height: 30px;width: 120px;font-size:14px;" onclick="handScanCode()">扫描</button>
+    <strong><a href="${base}/user/recognitioncardpage.html">名片识别</a></strong>-->
+    <button type="button" style="height: 30px;width: 120px;font-size:14px;" onclick="syncOnSiteRegistrateData()">同步现场登记数据</button>
+</div>
+<div align="center" style="height: 20px;padding-left: 50px;">
+    <button type="button" id="hastakeproceedBtn" name="hastakeproceedBtn" style="height: 30px;width: 120px;font-size:14px; display: none" onclick="setHastakeproceed()">我要领会刊</button>
+</div>
+
+<input type="hidden" id="takeproceedqrcodevalue" name="takeproceedqrcodevalue"/>
+<div id="leftview" name="leftview" style="float: left; width: 65%; height: 70%; margin-right: 20px;">
+    <div class="checkOuter">
+        <div class="checkbox" id="faircheckbox" name="faircheckbox"></div>
+    </div>
+    <div style="height: 420px;" class="easyui-panel" title="客商列表">
+        <table id="userList" style="width: 100%; height:370px;border: 1px solid #151515;margin-left: 30px;"
+               data-options="url:'${base}/user/queryCustomerListByFairIdAndPage?type=1',
+                   loadMsg: '数据加载中......',
+                   singleSelect:false,	//只能当行选择：关闭
+                   fit:true,
+                   fitColumns:true,
+                   idField:'id',
+                   remoteSort:true,
+                   emptyMsg: '没有记录',
+                   rownumbers: 'true',
+                   pagination:'true',
+                   pageSize:'20'">
+            <thead>
+            <tr>
+                <th data-options="field:'ck',checkbox:true"></th>
+                <th data-options="field: 'checkingno', width: $(this).width() / 10">
+                    登记号<br/>
+                    <input id="customerCheckingno" style="width:100%;height:15px;" type="text" onkeyup="filter();"/>
+                </th>
+                <th data-options="field: 'firstName', width: $(this).width() / 10">
+                    姓名<br/>
+                    <input id="customerFirstName" style="width:100%;height:15px;" type="text" onkeyup="filter();"/>
+                </th>
+                <th data-options="field: 'company', width: $(this).width() / 7">
+                    公司<br/>
+                    <input id="customerCompany" style="width:100%;height:15px;" type="text" onkeyup="filter();"/>
+                </th>
+                <th data-options="field: 'email', width: $(this).width() / 10">
+                    邮箱<br/>
+                    <input id="customerEmail" style="width:100%;height:15px;" type="text" onkeyup="filter();"/>
+                </th>
+                <th data-options="field: 'mobilePhone', width: $(this).width() / 10">
+                    手机<br/>
+                    <input id="customerMobilePhone" style="width:100%;height:15px;" type="text" onkeyup="filter();"/>
+                </th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<div id="rightview" name="rightview" style="float: right; width: 25%; height: 70%; margin-top: 10px; margin-right: 30px;border: 1px solid #151515;
+padding-top: 50px;box-sizing: border-box;background: url('${base}/resource/idcardinfobg.jpg');background-repeat: no-repeat">
+    <table id="fairdatainfo" style="width: 100%; height:320px; padding-left:30px;">
+        <tr>
+            <td style="width: 80px; text-align: center">姓名：</td>
+            <td style="width: 80px; text-align: center" colspan="2">
+                <label id="userName" type="text" name="userName" style="width: 155px" />
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 80px; text-align: center">公司：</td>
+            <td style="width: 80px; text-align: center" colspan="2">
+                <label id="userCompany" type="text" name="userCompany" style="width: 155px" />
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 80px; text-align: center">登记号：</td>
+            <td style="width: 80px; text-align: center" colspan="2">
+                <label id="checkingnoValue" type="text" name="checkingnoValue" style="width: 155px" />
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 80px; text-align: center">扫描次数：</td>
+            <td style="width: 80px; text-align: center" colspan="4">
+                <label id="scanNum" type="text" name="scanNum" style="width: 60%;" />
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 80px; text-align: center">会刊领取：</td>
+            <td style="width: 80px; text-align: center" colspan="4">
+                <label id="hastakeproceedStatus" type="text" name="hastakeproceedStatus" style="width: 155px;" />
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="loading"><img src="${base}/resource/load.gif"></div>
+
+<script type="text/javascript">
+    var checkedUserInfo = [];
+    function getFairIndex() {
+        for(var i=0,a;a=fairInfoList[i++];){
+            var checkBox = document.getElementById(a.fairalairname);
+            if(checkBox != null && checkBox.checked){
+                return a.fairid;
+            }
+        }
+    }
+
+    function syncOnSiteRegistrateData() {
+        $("#bg,.loading").show();
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            url: "${base}/user/syncOnSiteRegistrateData",
+            success: function (result) {
+                $("#bg,.loading").hide();
+                alert(result.description);
+            }
+        });
+    }
+
+    $(function() {
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            url: "${base}/user/loadAllEnableFairName",
+            success: function (result) {
+                if (result) {
+                    fairInfoList = result;
+                    var faircheckboxhtml = document.getElementById("faircheckbox");
+                    faircheckboxhtml.innerHTML = "";
+                    for (var i = 0, a; a = result[i++];) {
+                        if (i == 1) {
+                            var input = document.createElement("input");
+                            input.setAttribute("type", "checkbox");
+                            input.setAttribute("class", "checkboxInner checkInput");
+                            input.setAttribute("id", a.fairalairname);
+                            input.setAttribute("checked", "checked");
+                            input.onclick = function () {
+                                $(this).attr('checked', 'checked').siblings('input').removeAttr('checked');
+                                filter();
+                                //resetDetailDataInfo();
+                            };
+                            faircheckboxhtml.appendChild(input);
+                            var label = document.createElement("label");
+                            label.setAttribute("class", "checkboxInner");
+                            label.innerHTML = a.fairname;
+                            faircheckboxhtml.appendChild(label);
+                        } else {
+                            var input = document.createElement("input");
+                            input.setAttribute("type", "checkbox");
+                            input.setAttribute("class", "checkboxInner checkInput");
+                            input.setAttribute("id", a.fairalairname);
+                            input.onclick = function () {
+                                $(this).attr('checked', 'checked').siblings('input').removeAttr('checked');
+                                filter();
+                                //resetDetailDataInfo();
+                            };
+                            faircheckboxhtml.appendChild(input);
+                            var label = document.createElement("label");
+                            label.setAttribute("class", "checkboxInner");
+                            label.innerHTML = a.fairname;
+                            faircheckboxhtml.appendChild(label);
+                        }
+                    }
+                }
+            }
+        });
+
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            url: "${base}/user/loadAllColFieldList",
+            success: function (result) {
+                if (result) {
+                    $("#fair_name").html('');
+                    for (var i = 0, a; a = result[i++];) {
+                        $("#col_name").append('<option onclick="refreshCurrentInput()" value="' + a.colfield + '">' + a.colname + '</option>');
+                    }
+                }
+            }
+        });
+
+        $('#scancodeText').bind('input propertychange', function() {
+            var length = $(this).val().length;
+            var textValue = $(this).val();
+            var index = getFairIndex();
+            //var col_name_value = $("#col_name option:selected").val();
+            if (/*col_name_value != "" && col_name_value == "CheckingNo" && */10 == length){
+                document.getElementById("takeproceedqrcodevalue").value = textValue;
+
+                var filterParm = "?type=" + index;
+                filterParm += '&checkno=' + encodeURI(textValue);
+                filterParm += '&databaseindex=' + encodeURI(index);
+                $('#userList').datagrid('options').url = '${base}/user/queryVisitorInfoByCheckNo' + filterParm;
+                $('#userList').datagrid('reload');
+                document.getElementById("scancodeText").value = textValue;
+
+                $.ajax({
+                    url: "${base}/user/getShowQRCodeVisitorInfoByCheckNo",
+                    type: "post",
+                    async : false, //同步执行
+                    data: {"checkno": textValue, "fairId": index},
+                    dataType: "json",
+                    success: function (result) {
+                        if(result.resultCode == 0){
+                            document.getElementById("userName").innerHTML = result.firstname;
+                            document.getElementById("userCompany").innerHTML = result.company;
+                            document.getElementById("checkingnoValue").innerHTML = result.checkingno;
+                            document.getElementById("scanNum").innerHTML = result.scanNum;
+                            document.getElementById("hastakeproceedStatus").innerHTML = result.takeFlag == 1?"已经领取":"未领取";
+                        }else{
+                           alert(result.description);
+                        }
+                    }
+                });
+            }else if(0 == length){
+                var hastakeproceedBtn = document.getElementById("hastakeproceedBtn");
+                hastakeproceedBtn.style.display = "none";
+                $('#userList').datagrid('options').url = 'queryCustomerListByFairIdAndPage?type=' + index;
+                $('#userList').datagrid('reload');
+            }
+        });
+    });
+
+    function filter(){
+        var fairIndex = getFairIndex();
+        var filterParm = "?type=" + fairIndex;
+        if(document.getElementById("scancodeText").value != ""){
+            filterParm += '&checkingno=' + encodeURI(document.getElementById("scancodeText").value);
+        }else if(document.getElementById("customerCheckingno").value != ""){
+            filterParm += '&checkingno=' + encodeURI(document.getElementById("customerCheckingno").value);
+        }
+        if(document.getElementById("customerFirstName").value != ""){
+            filterParm += '&firstName=' + encodeURI(document.getElementById("customerFirstName").value);
+        }
+        if(document.getElementById("customerCompany").value != ""){
+            filterParm += '&company=' + encodeURI(document.getElementById("customerCompany").value);
+        }
+        if(document.getElementById("customerEmail").value != ""){
+            filterParm += '&email=' + encodeURI(document.getElementById("customerEmail").value);
+        }
+        if(document.getElementById("customerMobilePhone").value != ""){
+            filterParm += '&customerMobilePhone=' + encodeURI(document.getElementById("customerMobilePhone").value);
+        }
+        $('#userList').datagrid('options').url = '${base}/user/queryCustomerListByFairIdAndPage' + filterParm;
+        $('#userList').datagrid('reload');
+    }
+
+    //客商列表渲染
+    $("#userList").datagrid({
+        onSelect:function (rowIndex, rowData){
+            var row = $('#userList').datagrid('getSelections');
+            for (var i = 0; i < row.length; i++) {
+                if (findCheckedUserInfo(row[i].id) == -1) {
+                    checkedUserInfo.push(row[i].id);
+                }
+            }
+        },
+        onUnselect:function (rowIndex, rowData){
+            var k = findCheckedUserInfo(rowData.id);
+            if (k != -1) {
+                checkedUserInfo.splice(k, 1);
+            }
+        },
+        onSelectAll:function (rows){
+            for (var i = 0; i < rows.length; i++) {
+                var k = findCheckedUserInfo(rows[i].id);
+                if (k == -1) {
+                    checkedUserInfo.push(rows[i].id);
+                }
+            }
+        },
+        onUnselectAll:function (rows){
+            for (var i = 0; i < rows.length; i++) {
+                var k = findCheckedUserInfo(rows[i].id);
+                if (k != -1) {
+                    checkedUserInfo.splice(k, 1);
+                }
+            }
+        },
+        onLoadSuccess:function(data){
+            if(data.rows.length==0){
+                var body = $(this).data().datagrid.dc.body2;
+                body.find('table tbody').append('<tr><td width="'+body.width()+'" style="height: 25px; text-align: center;" colspan="4">没有数据</td></tr>');
+            }
+        },
+        onClickRow: function (index, field, value) {
+            document.getElementById("userName").innerHTML = field.firstName;
+            document.getElementById("userCompany").innerHTML = field.company;
+            document.getElementById("checkingnoValue").innerHTML = field.checkingno;
+            reloadDataDetailInfo(field.checkingno);
+        }
+    });
+
+    function reloadDataDetailInfo(checkingno) {
+        var urlvalue = "${base}/user/getScanNumByCheckingNo?checkingno=" + checkingno;
+        $.ajax({
+            url: urlvalue,
+            type: "post",
+            async : false, //同步执行
+            dataType: "json",
+            success: function (result) {
+                if (result) {
+                    //alert("已经扫描：【" + result.scannum + "】次");
+                    if(result.resultCode == 0){
+                        document.getElementById("scanNum").innerHTML = result.scannum;
+                    }else {
+                        document.getElementById("scanNum").innerHTML = "0";
+                    }
+                    document.getElementById("hastakeproceedStatus").innerHTML = result.takeFileFlag == 1?"已经领取":"未领取";
+
+                    if(result.takeFileFlag == 1){
+                        var hastakeproceedBtn = document.getElementById("hastakeproceedBtn");
+                        hastakeproceedBtn.style.display = "none";
+                    }else {
+                        document.getElementById("takeproceedqrcodevalue").value = checkingno;
+                        var hastakeproceedBtn = document.getElementById("hastakeproceedBtn");
+                        hastakeproceedBtn.style.display = "block";
+                    }
+                }
+            }
+        });
+    }
+    function findCheckedUserInfo(id) {
+        for (var i = 0; i < checkedUserInfo.length; i++) {
+            if (checkedUserInfo[i] == id) return i;
+        }
+        return -1;
+    }
+
+    function resetDetailDataInfo() {
+        checkedUserInfo = [];
+        document.getElementById("userName").innerHTML = "";
+        document.getElementById("userCompany").innerHTML = "";
+        document.getElementById("checkingnoValue").innerHTML = "";
+        document.getElementById("scanNum").innerHTML = "";
+        document.getElementById("hastakeproceedStatus").innerHTML = "";
+    }
+
+    var fairInfoList = [];
+
+    function getFairIndex() {
+        for(var i=0,a;a=fairInfoList[i++];){
+            var checkBox = document.getElementById(a.fairalairname);
+            if(checkBox != null && checkBox.checked){
+                return a.fairid;
+            }
+        }
+    }
+
+    function refreshCurrentInput() {
+        var col_name_value = $("#col_name option:selected").val();
+        if(col_name_value != "" && col_name_value == "CheckingNo"){
+            document.getElementById("scancodeText").setAttribute("oninput","(this.v=function(){this.value=this.value.replace(/[^0-9-]+/,'');}).call(this)");
+        }else{
+            document.getElementById("scancodeText").setAttribute("oninput","");
+        }
+        var hastakeproceedBtn = document.getElementById("hastakeproceedBtn");
+        hastakeproceedBtn.style.display = "none";
+    }
+
+    window.onload = function(){
+        document.getElementById("scancodeText").focus();
+    };
+
+    function handScanCode() {
+        var fieldvalue = document.getElementById("scancodeText").value;
+        var index = getFairIndex();
+        var col_name_value = $("#col_name option:selected").val();
+        document.getElementById("takeproceedqrcodevalue").value = fieldvalue;
+
+        var filterParm = "?type=" + index;
+        filterParm += '&fieldvalue=' + encodeURI(fieldvalue);
+        filterParm += '&databaseindex=' + encodeURI(index);
+        filterParm += '&field=' + encodeURI(col_name_value);
+        $('#userList').datagrid('options').url = '${base}/user/queryCheckingNoByFieldValue' + filterParm;
+        $('#userList').datagrid('reload');
+    }
+
+    function setHastakeproceed() {
+        var value = document.getElementById("takeproceedqrcodevalue").value;
+        $.ajax({
+            url: "${base}/user/setHastakeproceedByCheckNo",
+            type: "post",
+            async : false, //同步执行
+            data: {"checkno": value},
+            dataType: "json",
+            success: function (mapValue) {
+                if(mapValue.resultCode == 0){
+                    alert("会刊领取成功！");
+                    document.getElementById("scancodeText").focus();
+                }else{
+                    document.getElementById("scancodeText").focus();
+                }
+                var hastakeproceedBtn = document.getElementById("hastakeproceedBtn");
+                hastakeproceedBtn.style.display = "none";
+                reloadDataDetailInfo(value);
+            }
+        });
+    }
+</script>
+</body>
+</html>
